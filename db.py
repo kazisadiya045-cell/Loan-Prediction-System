@@ -1,7 +1,6 @@
 import mysql.connector
 from mysql.connector import Error
 
-# ✏️ Change these to match your MySQL setup
 DB_CONFIG = {
     "host":     "localhost",
     "port":     3306,
@@ -17,10 +16,7 @@ def get_connection():
             return conn
     except Error as e:
         print(f"[DB] Connection error: {e}")
-        # Troubleshooting:
-        # 1. MySQL running?   → sudo service mysql start
-        # 2. Wrong password?  → update DB_CONFIG above
-        # 3. No database?     → mysql -u root -p < database/schema.sql
+    
     return None
 
 def save_prediction(data: dict):
