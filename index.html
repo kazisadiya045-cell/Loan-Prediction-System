@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LoanIQ — AI Loan Decision</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+<div class="bg-canvas">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grid-overlay"></div>
+</div>
+
+<nav class="topnav">
+  <div class="brand"><span class="brand-icon">◈</span><span class="brand-name">LoanIQ</span></div>
+  <div class="nav-pill">AI · ML · Finance</div>
+</nav>
+
+<header class="hero">
+  <p class="hero-eyebrow">Powered by Random Forest · 94%+ Accuracy</p>
+  <h1 class="hero-title">Know Your Loan<br/><em>Decision</em> in Seconds.</h1>
+  <p class="hero-sub">Enter your financial profile and our ML model predicts your approval in real-time.</p>
+</header>
+
+<main class="main-wrapper">
+  <div class="glass-card">
+
+    <div class="steps" id="stepIndicator">
+      <div class="step active" data-step="1"><span class="step-dot">1</span><span class="step-label">Personal</span></div>
+      <div class="step-line"></div>
+      <div class="step" data-step="2"><span class="step-dot">2</span><span class="step-label">Financial</span></div>
+      <div class="step-line"></div>
+      <div class="step" data-step="3"><span class="step-dot">3</span><span class="step-label">Result</span></div>
+    </div>
+
+    <!-- Step 1 -->
+    <section class="form-step active" id="step1">
+      <h2 class="section-title">Personal Information</h2>
+      <div class="field-grid">
+        <div class="field">
+          <label>Age <span class="req">*</span></label>
+          <div class="input-wrap"><span class="input-icon">👤</span><input type="number" id="age" placeholder="e.g. 32" min="18" max="100"/></div>
+        </div>
+        <div class="field">
+          <label>Marital Status <span class="req">*</span></label>
+          <div class="input-wrap select-wrap">
+            <span class="input-icon">💍</span>
+            <select id="marital_status">
+              <option value="" disabled selected>Select status</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Divorced">Divorced</option>
+            </select>
+            <span class="chevron">▾</span>
+          </div>
+        </div>
+        <div class="field full-width">
+          <label>Education Level <span class="req">*</span></label>
+          <div class="edu-cards" id="eduCards">
+            <button type="button" class="edu-card" data-val="High School">🏫<span>High School</span></button>
+            <button type="button" class="edu-card" data-val="Bachelor">🎓<span>Bachelor's</span></button>
+            <button type="button" class="edu-card" data-val="Master">📚<span>Master's</span></button>
+            <button type="button" class="edu-card" data-val="PhD">🔬<span>PhD</span></button>
+          </div>
+          <input type="hidden" id="education"/>
+        </div>
+        <div class="field">
+          <label>Years Employed <span class="req">*</span></label>
+          <div class="input-wrap"><span class="input-icon">💼</span><input type="number" id="employment_years" placeholder="e.g. 5" min="0"/></div>
+        </div>
+        <div class="field">
+          <label>Existing Loans <span class="req">*</span></label>
+          <div class="input-wrap"><span class="input-icon">📋</span><input type="number" id="existing_loans" placeholder="0–4" min="0"/></div>
+        </div>
+      </div>
+      <div class="btn-row"><button class="btn-next" onclick="goToStep(2)">Continue <span>→</span></button></div>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="form-step" id="step2">
+      <h2 class="section-title">Financial Profile</h2>
+      <div class="field-grid">
+        <div class="field">
+          <label>Annual Income (₹) <span class="req">*</span></label>
+          <div class="input-wrap"><span class="input-icon">₹</span><input type="number" id="income" placeholder="e.g. 600000" min="1"/></div>
+        </div>
+        <div class="field">
+          <label>Loan Amount (₹) <span class="req">*</span></label>
+          <div class="input-wrap"><span class="input-icon">🏦</span><input type="number" id="loan_amount" placeholder="e.g. 150000" min="1"/></div>
+        </div>
+        <div class="field full-width">
+          <label>Credit Score <span class="req">*</span></label>
+          <div class="slider-wrapper">
+            <input type="range" id="credit_score" min="300" max="850" value="650" class="slider" oninput="updateCreditDisplay(this.value)"/>
+            <div class="slider-labels">
+              <span>300 Poor</span>
+              <span id="creditValue" class="credit-badge">650</span>
+              <span>850 Excellent</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dti-box">
+        <span class="dti-label">Loan-to-Income Ratio</span>
+        <div class="dti-bar-wrap"><div class="dti-bar" id="dtiBar"></div></div>
+        <span class="dti-pct" id="dtiPct">—</span>
+      </div>
+      <div class="btn-row spaced">
+        <button class="btn-back" onclick="goToStep(1)">← Back</button>
+        <button class="btn-next" onclick="submitPrediction()">
+          <span id="btnLabel">Predict Now</span>
+          <span class="spinner hidden" id="spinner">⟳</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="form-step" id="step3">
+      <div class="result-container" id="resultContainer"></div>
+      <div class="btn-row spaced" style="margin-top:2rem;">
+        <button class="btn-back" onclick="resetForm()">← New Application</button>
+        <button class="btn-next save-btn" onclick="saveToDb()">Save to DB 💾</button>
+      </div>
+      <div class="save-msg hidden" id="saveMsg"></div>
+    </section>
+
+
+
+
+<select name="marital_status" required>
+    <option value="Single">Single</option>
+    <option value="Married">Married</option>
+    <option value="Divorced">Divorced</option>
+</select>
+
+<select name="education" required>
+    <option value="High School">High School</option>
+    <option value="Bachelor">Bachelor</option>
+    <option value="Master">Master</option>
+    <option value="PhD">PhD</option>
+</select>
+
+
+
+
+  </div><!-- /glass-card -->
+
+  <div class="stats-strip">
+    <div class="stat"><span class="stat-num">99.6%</span><span class="stat-lbl">Accuracy</span></div>
+    <div class="stat-div"></div>
+    <div class="stat"><span class="stat-num">100K</span><span class="stat-lbl">Training Records</span></div>
+    <div class="stat-div"></div>
+    <div class="stat"><span class="stat-num">200</span><span class="stat-lbl">Decision Trees</span></div>
+    <div class="stat-div"></div>
+    <div class="stat"><span class="stat-num">&lt;50ms</span><span class="stat-lbl">Inference Time</span></div>
+  </div>
+</main>
+
+<canvas id="confettiCanvas"></canvas>
+<div class="toast" id="toast"></div>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+
+
+
+
